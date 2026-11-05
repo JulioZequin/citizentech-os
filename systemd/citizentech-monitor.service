@@ -1,0 +1,13 @@
+[Unit]
+Description=CitizenTech - Monitoramento de CPU, memoria e disco
+After=network.target
+
+[Service]
+Type=simple
+ExecStart=/bin/bash /opt/citizentech/scripts/monitor.sh
+# Tolerância a falhas: se o processo morrer, o systemd reinicia em 5s
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

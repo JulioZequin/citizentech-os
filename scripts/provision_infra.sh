@@ -15,6 +15,10 @@ log INFO "Início do provisionamento da infraestrutura"
 hostnamectl set-hostname "$SERVER_HOSTNAME"
 log INFO "Hostname definido: $SERVER_HOSTNAME"
 
+# --- 1b. Fuso horário ---
+timedatectl set-timezone "$TIMEZONE"
+log INFO "Fuso horário definido: $TIMEZONE"
+
 # --- 2. Resolução local de nomes (/etc/hosts) ---
 # Remove linhas antigas do projeto para o script poder rodar várias vezes
 sed -i '/# citizentech$/d' /etc/hosts
@@ -51,6 +55,6 @@ log INFO "Netplan configurado: $NET_INTERFACE = $STATIC_IP/$NETMASK_CIDR"
 
 # Aplica a rede em 3 segundos, depois que o script terminar.
 # A conexão SSH atual vai cair porque o IP muda.
-systemd-run --on-active=3s /usr/sbin/netplan apply > /dev/null
+systemd-run --on-active=3s /usr/sbin/netplan apply > /dev/null 2>&1
 log AVISO "Rede será aplicada em 3s. Reconecte com: ssh ${SUDO_USER:-$USER}@$STATIC_IP"
 log INFO "Provisionamento da infraestrutura concluído"
