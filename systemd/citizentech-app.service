@@ -1,0 +1,17 @@
+[Unit]
+Description=CitizenTech - Aplicacao web Calor Extremo
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+User=citizentech
+Group=citizentech
+WorkingDirectory=/opt/citizentech/app
+EnvironmentFile=/etc/citizentech/app.env
+ExecStart=/opt/citizentech/app/venv/bin/gunicorn --workers 2 --bind 127.0.0.1:8000 app:app
+# Se a aplicação cair, o systemd reinicia em 5s
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target
