@@ -6,6 +6,15 @@
 set -euo pipefail
 cd "$(dirname "$0")"
 
+if [[ $EUID -ne 0 ]]; then
+  echo "Erro: execute com sudo bash setup.sh"
+  exit 1
+fi
+
+# Fuso horário primeiro, para todos os logs ficarem no horário local
+source config.env
+timedatectl set-timezone "$TIMEZONE"
+
 echo "=== 1/3 Aplicação ==="
 bash scripts/provision_app.sh
 
