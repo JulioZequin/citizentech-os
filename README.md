@@ -225,22 +225,69 @@ journalctl -u citizentech-monitor
 
 ## Evidências
 
-As capturas de tela estão na pasta [`evidencias/`](evidencias/).
+Capturas de tela dos testes realizados na VM. Os arquivos estão na pasta [`evidencias/`](evidencias/).
 
-| Evidência | Arquivo |
-|---|---|
-| Provisionamento completo (`setup.sh`) | `evidencias/01-setup-completo.png` |
-| Verificação de rede, hostname e DNS | `evidencias/02-verificacao-rede.png` |
-| Aplicação no navegador | `evidencias/03-aplicacao-navegador.png` |
-| Serviços ativos | `evidencias/04-servicos-ativos.png` |
-| Monitor em execução | `evidencias/05-monitor-status.png` |
-| Alerta de CPU | `evidencias/06-alerta-cpu.png` |
-| Alerta de disco | `evidencias/07-alerta-disco.png` |
-| Recuperação após `kill -9` | `evidencias/08-kill-recuperacao.png` |
-| Falha e recuperação do Nginx | `evidencias/09-nginx-recuperacao.png` |
-| Start, stop e restart do monitor | `evidencias/10-start-stop-restart.png` |
-| Serviços após reboot | `evidencias/11-reboot.png` |
-| Falha controlada no log | `evidencias/12-teste-falha-log.png` |
+### 1. Provisionamento completo (`setup.sh`)
+Execução do script único que provisiona aplicação, monitoramento e infraestrutura.
+
+![Provisionamento completo](evidencias/01-setup-completo.png)
+
+### 2. Verificação de rede, hostname e DNS
+Hostname, fuso horário, IP fixo, resolução do domínio local, servidores DNS e conectividade.
+
+![Verificação de rede](evidencias/02-verificacao-rede.png)
+
+### 3. Aplicação no navegador
+Aplicação acessada pelo Windows no endereço da VM.
+
+![Aplicação no navegador](evidencias/03-aplicacao-navegador.png)
+
+### 4. Serviços ativos
+Aplicação, monitor e Nginx ativos e habilitados para iniciar com o sistema.
+
+![Serviços ativos](evidencias/04-servicos-ativos.png)
+
+### 5. Monitor em execução
+Serviço de monitoramento ativo, registrando CPU, memória e disco.
+
+![Monitor em execução](evidencias/05-monitor-status.png)
+
+### 6. Alerta de CPU
+Alertas de consumo elevado de CPU registrados durante picos de inicialização.
+
+![Alerta de CPU](evidencias/06-alerta-cpu.png)
+
+### 7. Alerta de disco
+Arquivo de teste de 4 GB elevando o uso de disco para 86% e gerando alerta.
+
+![Alerta de disco](evidencias/07-alerta-disco.png)
+
+### 8. Recuperação após `kill -9`
+Processo do monitor encerrado à força e reiniciado pelo systemd com novo PID.
+
+![Recuperação após kill](evidencias/08-kill-recuperacao.png)
+
+### 9. Falha e recuperação do Nginx
+Nginx parado manualmente, falha detectada e serviço recuperado pelo monitor.
+
+![Recuperação do Nginx](evidencias/09-nginx-recuperacao.png)
+
+### 10. Start, stop e restart do monitor
+Controle manual do serviço de monitoramento.
+
+![Start, stop e restart](evidencias/10-start-stop-restart.png)
+
+### 11. Serviços após reboot
+Serviços ativos automaticamente após reinicialização da VM.
+
+![Serviços após reboot](evidencias/11-reboot.png)
+
+### 12. Falha controlada no log
+Erro provocado de propósito e registrado no log de auditoria com linha e comando.
+
+![Falha controlada no log](evidencias/12-teste-falha-log.png)
+
+---
 
 ---
 
