@@ -11,6 +11,9 @@ if [[ $EUID -ne 0 ]]; then
   exit 1
 fi
 
+chronyc makestep > /dev/null 2>&1 || true
+sleep 2
+
 # Fuso horário primeiro, para todos os logs ficarem no horário local
 source config.env
 timedatectl set-timezone "$TIMEZONE"
