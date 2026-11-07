@@ -1,8 +1,9 @@
 """
-CitizenTech - Calor Extremo
-Mostra a temperatura atual da cidade, o nível de alerta e pontos de hidratação.
-Fonte da temperatura: API pública Open-Meteo (open-meteo.com).
-Pontos de hidratação: dados SIMULADOS para o protótipo.
+Refresca - Página de alerta de calor (CitizenTech)
+Mostra o índice de calor atual na Vila Mariana, o nível de alerta e os
+Pontos Refresca mais próximos, para trabalhadores de rua.
+Temperatura e umidade: API pública Open-Meteo (open-meteo.com).
+Índice de calor: fórmula da NOAA. Pontos Refresca: dados SIMULADOS.
 """
 import os
 import requests
@@ -10,47 +11,70 @@ from flask import Flask, jsonify, render_template_string
 
 app = Flask(__name__)
 
-APP_NAME = os.getenv("APP_NAME", "CitizenTech Calor Extremo")
-CIDADE = os.getenv("CIDADE", "São Paulo")
-LATITUDE = os.getenv("LATITUDE", "-23.55")
+APP_NAME = os.getenv("APP_NAME", "Refresca")
+CIDADE = os.getenv("CIDADE", "Vila Mariana, São Paulo")
+LATITUDE = os.getenv("LATITUDE", "-23.59")
 LONGITUDE = os.getenv("LONGITUDE", "-46.63")
 
-# Dados simulados (não são pontos reais)
-PONTOS_HIDRATACAO = [
-    {"nome": "Praça da Sé - bebedouro público", "horario": "24 horas"},
-    {"nome": "Estação Paulista - ponto de água", "horario": "6h às 22h"},
-    {"nome": "Parque Ibirapuera - portão 3", "horario": "5h às 0h"},
+# Dados simulados (comércios fictícios)
+PONTOS_REFRESCA = [
+    {"nome": "Padaria Exemplo - Rua Domingos de Morais",
+     "agua": True, "sombra": True, "banheiro": True},
+    {"nome": "Mercadinho Exemplo - perto do Metrô Ana Rosa",
+     "agua": True, "sombra": True, "banheiro": False},
+    {"nome": "Banca Exemplo - perto do Metrô Vila Mariana",
+     "agua": True, "sombra": False, "banheiro": False},
 ]
 
 
-def obter_temperatura():
-    """Busca a temperatura atual na Open-Meteo. Retorna None se falhar."""
+def obter_clima():
+    """Busca temperatura (°C) e umidade (%) atuais na Open-Meteo."""
     try:
         resposta = requests.get(
             "https://api.open-meteo.com/v1/forecast",
             params={"latitude": LATITUDE, "longitude": LONGITUDE,
-                    "current": "temperature_2m"},
+                    "current": "temperature_2m,relative_humidity_2m"},
             timeout=5,
         )
         resposta.raise_for_status()
-        return resposta.json()["current"]["temperature_2m"]
+        atual = resposta.json()["current"]
+        return atual["temperature_2m"], atual["relative_humidity_2m"]
     except Exception:
-        return None
+        return None, None
 
 
-def nivel_alerta(temp):
-    """Classifica o risco de acordo com a temperatura."""
-    if temp is None:
+def indice_calor(temp_c, umidade):
+    """Índice de calor (sensação térmica) pela fórmula da NOAA, em °C."""
+    t = temp_c * 9 / 5 + 32          # a fórmula trabalha em Fahrenheit
+    rh = umidade
+    ic = 0.5 * (t + 61.0 + (t - 68.0) * 1.2 + rh * 0.094)
+    if (ic + t) / 2 >= 80:           # acima de ~27 °C usa a regressão completa
+        ic = (-42.379 + 2.04901523 * t + 10.14333127 * rh
+              - 0.22475541 * t * rh - 0.00683783 * t * t
+              - 0.05481717 * rh * rh + 0.00122874 * t * t * rh
+              + 0.00085282 * t * rh * rh - 0.00000199 * t * t * rh * rh)
+    return (ic - 32) * 5 / 9
+
+
+def nivel_alerta(ic):
+    """Níveis da Refresca: normal < 27 °C <= atenção < 32 °C <= perigo."""
+    if ic is None:
         return {"nivel": "SEM DADOS", "cor": "#555555",
-                "mensagem": "Não foi possível obter a temperatura agora."}
-    if temp >= 35:
-        return {"nivel": "ALERTA", "cor": "#b00020",
-                "mensagem": "Calor extremo: beba água, evite o sol entre 10h e 16h e cuide dos idosos."}
-    if temp >= 30:
-        return {"nivel": "ATENÇÃO", "cor": "#b35c00",
-                "mensagem": "Muito calor: hidrate-se e procure sombra."}
+                "mensagem": "Não foi possível obter o clima agora."}
+    if ic >= 32:
+        return {"nivel": "PERIGO", "cor": "#b00020",
+                "mensagem": "Calor perigoso: faça pausas na sombra, beba água com frequência e procure um Ponto Refresca."}
+    if ic >= 27:
+        return {"nivel": "ATENÇÃO", "cor": "#8a5200",
+                "mensagem": "Calor forte: hidrate-se e evite o sol direto nas horas mais quentes."}
     return {"nivel": "NORMAL", "cor": "#1b5e20",
-            "mensagem": "Temperatura sem risco no momento."}
+            "mensagem": "Sem risco de calor no momento."}
+
+
+def dados_atuais():
+    temp, umidade = obter_clima()
+    ic = indice_calor(temp, umidade) if temp is not None else None
+    return temp, umidade, ic, nivel_alerta(ic)
 
 
 PAGINA = """
@@ -66,27 +90,32 @@ PAGINA = """
     main { max-width: 640px; margin: 0 auto; padding: 16px; }
     .alerta { background: {{ alerta.cor }}; color: #fff; padding: 20px;
               border-radius: 12px; }
-    .temp { font-size: 48px; font-weight: bold; margin: 8px 0; }
-    li { margin: 8px 0; }
+    .ic { font-size: 48px; font-weight: bold; margin: 8px 0; }
+    li { margin: 10px 0; }
     small { color: #444; }
   </style>
 </head>
 <body>
   <main>
     <h1>{{ app_name }}</h1>
+    <p>Alerta de calor para quem trabalha na rua.</p>
     <section class="alerta">
       <div>{{ cidade }} agora</div>
-      <div class="temp">{{ temp_texto }}</div>
-      <strong>{{ alerta.nivel }}</strong>
-      <p>{{ alerta.mensagem }}</p>
+      <div>Sensação térmica (índice de calor)</div>
+      <div class="ic">{{ ic_texto }}</div>
+      <div>Temperatura {{ temp_texto }} · Umidade {{ umidade_texto }}</div>
+      <p><strong>{{ alerta.nivel }}</strong><br>{{ alerta.mensagem }}</p>
     </section>
-    <h2>Pontos de hidratação</h2>
+    <h2>Pontos Refresca</h2>
     <ul>
       {% for p in pontos %}
-      <li><strong>{{ p.nome }}</strong> - {{ p.horario }}</li>
+      <li><strong>{{ p.nome }}</strong><br>
+        {{ "Água" if p.agua }}{{ " · Sombra" if p.sombra }}{{ " · Banheiro" if p.banheiro }}
+      </li>
       {% endfor %}
     </ul>
-    <small>Temperatura: Open-Meteo. Pontos de hidratação: dados simulados.</small>
+    <small>Clima: Open-Meteo. Índice de calor: fórmula da NOAA.
+    Pontos Refresca: dados simulados.</small>
   </main>
 </body>
 </html>
@@ -95,18 +124,21 @@ PAGINA = """
 
 @app.route("/")
 def index():
-    temp = obter_temperatura()
-    temp_texto = f"{temp:.0f} °C" if temp is not None else "--"
+    temp, umidade, ic, alerta = dados_atuais()
     return render_template_string(
-        PAGINA, app_name=APP_NAME, cidade=CIDADE, temp_texto=temp_texto,
-        alerta=nivel_alerta(temp), pontos=PONTOS_HIDRATACAO)
+        PAGINA, app_name=APP_NAME, cidade=CIDADE, alerta=alerta,
+        pontos=PONTOS_REFRESCA,
+        ic_texto=f"{ic:.0f} °C" if ic is not None else "--",
+        temp_texto=f"{temp:.0f} °C" if temp is not None else "--",
+        umidade_texto=f"{umidade:.0f}%" if umidade is not None else "--")
 
 
 @app.route("/api/status")
 def api_status():
-    temp = obter_temperatura()
-    return jsonify({"cidade": CIDADE, "temperatura": temp,
-                    **nivel_alerta(temp), "pontos_hidratacao": PONTOS_HIDRATACAO})
+    temp, umidade, ic, alerta = dados_atuais()
+    return jsonify({"local": CIDADE, "temperatura": temp, "umidade": umidade,
+                    "indiceCalor": round(ic, 1) if ic is not None else None,
+                    **alerta, "pontosRefresca": PONTOS_REFRESCA})
 
 
 @app.route("/health")

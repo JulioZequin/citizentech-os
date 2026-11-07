@@ -1,9 +1,11 @@
-# CitizenTech Calor Extremo — Infraestrutura Linux
+# Refresca — Infraestrutura Linux
 
 Global Solution 2026.2 · FIAP · Engenharia de Software (3º ano)
 Disciplina: **Operating Systems**
 
-Infraestrutura Linux automatizada por Shell Script para hospedar a aplicação web **CitizenTech Calor Extremo**. Um único comando prepara o servidor do zero: rede, DNS, usuários, dependências, aplicação, serviços systemd, monitoramento e logs de auditoria.
+Parte da CitizenTech **Refresca**: alertas de calor extremo e pontos de água e sombra para trabalhadores de rua da Vila Mariana.
+
+Este repositório contém a infraestrutura Linux automatizada por Shell Script que hospeda a página de alerta da Refresca. Um único comando prepara o servidor do zero: rede, DNS, usuários, dependências, aplicação, serviços systemd, monitoramento e logs de auditoria.
 
 ---
 
@@ -21,17 +23,27 @@ Infraestrutura Linux automatizada por Shell Script para hospedar a aplicação w
 
 ## Ficha da CitizenTech
 
-| Campo | Descrição |
+| Campo | Conteúdo |
 |---|---|
-| Nome da CitizenTech | CitizenTech Calor Extremo |
-| Cidade e bairro | São Paulo (SP) |
-| Cidadão beneficiado | Idosos e trabalhadores de rua expostos ao calor |
-| Problema, em uma frase | Nos dias de calor extremo, quem está mais exposto não tem uma forma simples de saber o nível de risco e onde se hidratar. |
-| Como funciona | Página web simples que mostra a temperatura atual da cidade, o nível de alerta (normal, atenção, alerta) e pontos de hidratação. |
-| O que esta parte faz | Servidor Linux que hospeda a aplicação de forma automatizada, monitorada e tolerante a falhas. |
+| Nome | Refresca |
+| Cidade e bairro | São Paulo, Vila Mariana |
+| Cidadão beneficiado | Trabalhador de rua: ambulante, entregador, gari, vendedor de banca |
+| Problema, em uma frase | Trabalhadores de rua da Vila Mariana passam o dia expostos ao sol sem saber quando o calor fica perigoso, nem onde encontrar sombra e água por perto. |
+| Como funciona | 1. Totens "Ponto Refresca" em comércios parceiros medem o índice de calor na rua e mostram um alerta colorido para quem passa. 2. Um modelo treinado com dados do INMET prevê se amanhã será um dia de calor perigoso. 3. O app avisa o trabalhador na véspera, mostra os pontos com água, sombra e banheiro mais próximos e lembra das pausas para hidratação. |
+| O que esta parte faz | Servidor Linux que hospeda a página de alerta da Refresca de forma automatizada, monitorada e tolerante a falhas. |
 | Link do repositório | https://github.com/JulioZequin/citizentech-os |
-| Indicador de impacto | Disponibilidade do serviço nos dias de alerta (tempo no ar e tempo de recuperação após falhas). |
-| ODS conectados | ODS 3 (Saúde e bem-estar), ODS 11 (Cidades e comunidades sustentáveis), ODS 13 (Ação contra a mudança global do clima) |
+| Indicador de impacto | Pausas de hidratação registradas no app em dias de alerta; % de alertas enviados antes do pico de calor; recall do modelo nos dias perigosos |
+| ODS conectados | 3, 8, 10, 11 e 13 |
+
+Repositório do serviço de previsão (SOA): https://github.com/italocaliari/gs_soa
+
+**Níveis do índice de calor** (faixas da NOAA, iguais em todas as partes da Refresca):
+
+| Nível | Índice de calor |
+|---|---|
+| Normal | abaixo de 27 °C |
+| Atenção | de 27 °C até abaixo de 32 °C |
+| Perigo | a partir de 32 °C |
 
 ---
 
@@ -299,8 +311,9 @@ Link: _(adicionar link do YouTube)_
 
 ## Fontes de dados
 
-- **Temperatura:** API pública [Open-Meteo](https://open-meteo.com)
-- **Pontos de hidratação:** dados simulados para o protótipo
+- **Temperatura e umidade:** API pública [Open-Meteo](https://open-meteo.com)
+- **Índice de calor:** fórmula da NOAA, a mesma usada nas outras partes da Refresca
+- **Pontos Refresca:** dados simulados (comércios fictícios). Nenhum dado pessoal real é usado.
 
 ## Uso de IA
 
