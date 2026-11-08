@@ -428,7 +428,7 @@ Avaliação (10,0 pontos):
 - [x] Monitoramento como serviço tolerante a falhas (1,0) · `systemd/citizentech-monitor.service`
 - [x] Logs de auditoria e execução dos scripts (1,0) · `scripts/common.sh`, `/var/log/citizentech/`
 - [x] Funcionamento completo da proposta (2,0) · `setup.sh`
-- [ ] Vídeo de demonstração (até 7 minutos)
+- [x] Vídeo de demonstração (até 7 minutos)
 
 ## Dados
 
