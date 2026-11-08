@@ -416,7 +416,7 @@ Erro provocado de propósito e registrado no log de auditoria com linha e comand
 
 ### Vídeo
 
-[link do YouTube]
+https://youtu.be/2qLdLkE8OUA
 
 ## Entregáveis da disciplina
 
